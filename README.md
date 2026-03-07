@@ -1,1 +1,1 @@
-# burn-vgg
+# VGG Burn
