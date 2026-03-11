@@ -1,9 +1,22 @@
+use burn::module::Module;
 use burn::tensor::activation::softmax;
 use burn::tensor::backend::Backend;
 use burn::Tensor;
 use super::conv_block::*;
 use super::fc_block::*;
 
+pub enum VggVersion {
+    Vgg11,
+    Vgg11Bn,
+    Vgg13,
+    Vgg13Bn,
+    Vgg16,
+    Vgg16Bn,
+    Vgg19,
+    Vgg19Bn
+}
+
+#[derive(Module, Debug)]
 pub struct Vgg<B: Backend> {
     conv_block1: ConvBlock<B>,
     conv_block2: ConvBlock<B>,
@@ -15,7 +28,10 @@ pub struct Vgg<B: Backend> {
 
 impl<B: Backend> Vgg<B> {
     pub fn forward(&self, input: Tensor<B, 4>) -> Tensor<B, 2> {
-        let conv1_out = self.conv_block1.forward(input);
+        let [n, c, _, _] = input.dims();
+        let reshaped_input = input.reshape([n, c, 224, 224]);
+        
+        let conv1_out = self.conv_block1.forward(reshaped_input);
         let conv2_out = self.conv_block2.forward(conv1_out);
         let conv3_out = self.conv_block3.forward(conv2_out);
         let conv4_out = self.conv_block4.forward(conv3_out);

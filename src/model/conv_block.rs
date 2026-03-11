@@ -1,19 +1,22 @@
+use burn::module::Module;
 use burn::Tensor;
 use burn::nn::{BatchNorm, BatchNormConfig, PaddingConfig2d, Relu};
 use burn::nn::conv::{Conv2d, Conv2dConfig};
 use burn::nn::pool::{MaxPool2d, MaxPool2dConfig};
 use burn::tensor::backend::Backend;
 
+#[derive(Module, Debug)]
 pub struct ConvBlock<B: Backend> {
     pub conv_layers: Vec<Conv2d<B>>,
     pub relu: Relu,
     pub max_pool2d: MaxPool2d,
-    pub batch_norm: Option<BatchNorm<B>>,
+    pub bn_layers: Vec<BatchNorm<B>>,
 }
 
 impl<B: Backend> ConvBlock<B> {
     pub fn new(channels: usize, layers_num: usize, batch_normalize: bool, device: &B::Device) -> Self {
         let mut conv_layers = Vec::with_capacity(layers_num);
+        let mut bn_layers = Vec::with_capacity(layers_num);
         
         // Add first conv layer in the block
         let conv1_config;
@@ -24,25 +27,26 @@ impl<B: Backend> ConvBlock<B> {
         }
         conv_layers.push(conv1_config);
         
-        // Add the remaining conv layers in the block (if there are any)
+        // Add first bn layer in the block if batch normalization is used
+        if batch_normalize {
+            bn_layers.push(BatchNormConfig::new(channels).init(device));
+        }
+        
+        // Add the remaining conv layers and bn layers in the block (if there are any)
         for _ in 0..layers_num-1 {
             let conv_config = Self::conv_config(channels, channels, device);
             conv_layers.push(conv_config);
-        }
-        
-        // Initialize batch norm
-        let batch_norm;
-        if batch_normalize {
-            batch_norm = Some(BatchNormConfig::new(channels).init(device));
-        } else {
-            batch_norm = None;
+            
+            if batch_normalize {
+                bn_layers.push(BatchNormConfig::new(channels).init(device));
+            }
         }
         
         Self { 
             conv_layers,
             relu: Relu,
             max_pool2d: MaxPool2dConfig::new([2, 2]).init(),
-            batch_norm
+            bn_layers
         }
     }
     
@@ -53,19 +57,19 @@ impl<B: Backend> ConvBlock<B> {
             .init(device)
     }
     
-    pub fn forward(&self, input: Tensor<B, 4>) -> Tensor<B, 4> {
-        let [n, c, _, _] = input.dims();
-        let reshaped_input = input.reshape([n, c, 224, 224]);
-        
-        let mut relu_out = reshaped_input;
-        for conv_layer in &self.conv_layers {
-            let mut conv_out = conv_layer.forward(relu_out);
-            
-            if let Some(bn) = &self.batch_norm {
-                conv_out = bn.forward(conv_out);
+    pub fn forward(&self, input: Tensor<B, 4>) -> Tensor<B, 4> {    
+        let mut relu_out = input;
+        if self.bn_layers.is_empty() {
+            for conv_layer in &self.conv_layers {
+                let conv_out = conv_layer.forward(relu_out);
+                relu_out = self.relu.forward(conv_out);
             }
-            
-            relu_out = self.relu.forward(conv_out);
+        } else {
+            for (conv_layer, bn_layer) in self.conv_layers.iter().zip(&self.bn_layers) {
+                let conv_out = conv_layer.forward(relu_out);
+                let bn_out = bn_layer.forward(conv_out);
+                relu_out = self.relu.forward(bn_out);
+            }
         }
         
         self.max_pool2d.forward(relu_out)
