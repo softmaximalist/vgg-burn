@@ -5,5 +5,7 @@ edition = "2024"
 
 [dependencies]
 # Note: default-features = false is needed to disable std
-burn = { version = "0.20.0", default-features = false }
-burn-store = { version = "0.20.0" }
+burn = { version = "=0.21.0-pre.2", default-features = false }
+burn-std = { version = "=0.21.0-pre.2", default-features = false, features = ["network"] }
+burn-store = { version = "=0.21.0-pre.2" }
+dirs = "6.0.0"
