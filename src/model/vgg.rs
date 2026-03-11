@@ -4,6 +4,7 @@ use burn::tensor::backend::Backend;
 use burn::Tensor;
 use super::conv_block::*;
 use super::fc_block::*;
+use super::weights::load_pretrained_weights;
 
 pub enum VggVersion {
     Vgg11,
@@ -38,20 +39,56 @@ impl<B: Backend> Vgg<B> {
         }
     }
     
-    pub fn vgg11(batch_normalize: bool, device: &B::Device) -> Self {
-        Self::construct_vgg([1_usize, 1, 2, 2, 2], batch_normalize, device)
+    pub fn vgg11(batch_normalize: bool, pretrained: bool, device: &B::Device) -> Self {
+        let vgg = Self::construct_vgg([1_usize, 1, 2, 2, 2], batch_normalize, device);
+        if pretrained {
+            if batch_normalize {
+                return load_pretrained_weights(vgg, VggVersion::Vgg11Bn)
+            } else {
+                return load_pretrained_weights(vgg, VggVersion::Vgg11)
+            }
+        }
+        
+        vgg
     }
     
-    pub fn vgg13(batch_normalize: bool, device: &B::Device) -> Self {
-        Self::construct_vgg([2_usize, 2, 2, 2, 2], batch_normalize, device)
+    pub fn vgg13(batch_normalize: bool, pretrained: bool, device: &B::Device) -> Self {
+        let vgg = Self::construct_vgg([2_usize, 2, 2, 2, 2], batch_normalize, device);
+        if pretrained {
+            if batch_normalize {
+                return load_pretrained_weights(vgg, VggVersion::Vgg13Bn)
+            } else {
+                return load_pretrained_weights(vgg, VggVersion::Vgg13)
+            }
+        }
+        
+        vgg
     }
     
-    pub fn vgg16(batch_normalize: bool, device: &B::Device) -> Self {
-        Self::construct_vgg([2_usize, 2, 3, 3, 3], batch_normalize, device)
+    pub fn vgg16(batch_normalize: bool, pretrained: bool, device: &B::Device) -> Self {
+        let vgg = Self::construct_vgg([2_usize, 2, 3, 3, 3], batch_normalize, device);
+        if pretrained {
+            if batch_normalize {
+                return load_pretrained_weights(vgg, VggVersion::Vgg16Bn)
+            } else {
+                return load_pretrained_weights(vgg, VggVersion::Vgg16)
+            }
+        }
+        
+        vgg
     }
     
-    pub fn vgg19(batch_normalize: bool, device: &B::Device) -> Self {
-        Self::construct_vgg([2_usize, 2, 4, 4, 4], batch_normalize, device)
+    pub fn vgg19(batch_normalize: bool, pretrained: bool, device: &B::Device) -> Self {
+        let vgg = Self::construct_vgg([2_usize, 2, 4, 4, 4], batch_normalize, device);
+        if pretrained {
+            if batch_normalize {
+                return load_pretrained_weights(vgg, VggVersion::Vgg19Bn)
+            } else {
+                return load_pretrained_weights(vgg, VggVersion::Vgg19)
+            }
+        }
+        
+        vgg
     }
     
     pub fn forward(&self, input: Tensor<B, 4>) -> Tensor<B, 2> {
