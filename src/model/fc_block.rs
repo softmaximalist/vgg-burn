@@ -1,7 +1,9 @@
+use burn::module::Module;
 use burn::nn::{Linear, LinearConfig};
 use burn::tensor::backend::Backend;
 use burn::Tensor;
 
+#[derive(Module, Debug)]
 pub struct FcBlock<B: Backend> {
     layer1: Linear<B>,
     layer2: Linear<B>,
