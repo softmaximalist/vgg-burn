@@ -1,4 +1,5 @@
 use burn::module::Module;
+use burn::nn::pool::{AdaptiveAvgPool2d, AdaptiveAvgPool2dConfig};
 use burn::tensor::activation::softmax;
 use burn::tensor::backend::Backend;
 use burn::Tensor;
@@ -30,6 +31,7 @@ pub struct Vgg<B: Backend> {
     conv_block3: ConvBlock<B>,
     conv_block4: ConvBlock<B>,
     conv_block5: ConvBlock<B>,
+    adaptive_pool: AdaptiveAvgPool2d,
     fc_block: FcBlock<B>
 }
 
@@ -41,6 +43,7 @@ impl<B: Backend> Vgg<B> {
             conv_block3: ConvBlock::new(128, 256, layer_nums[2], batch_normalize, device),
             conv_block4: ConvBlock::new(256, 512, layer_nums[3], batch_normalize, device),
             conv_block5: ConvBlock::new(512, 512, layer_nums[4], batch_normalize, device),
+            adaptive_pool: AdaptiveAvgPool2dConfig::new([7, 7]).init(),
             fc_block: FcBlock::new(device)
         }
     }
@@ -103,7 +106,9 @@ impl<B: Backend> Vgg<B> {
         let conv3_out = self.conv_block3.forward(conv2_out);
         let conv4_out = self.conv_block4.forward(conv3_out);
         let conv5_out = self.conv_block5.forward(conv4_out);
-        let conv_out = conv5_out.flatten(1, 3);
+        
+        let pool_out = self.adaptive_pool.forward(conv5_out);
+        let conv_out = pool_out.flatten(1, 3);
         
         let fc_out = self.fc_block.forward(conv_out);
         softmax(fc_out, 1)
