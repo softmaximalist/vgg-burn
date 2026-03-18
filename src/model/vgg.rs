@@ -4,7 +4,13 @@ use burn::tensor::backend::Backend;
 use burn::Tensor;
 use super::conv_block::*;
 use super::fc_block::*;
+#[cfg(feature = "pretrained")]
 use super::weights::load_pretrained_weights;
+
+#[cfg(not(feature = "pretrained"))]
+fn load_pretrained_weights<B: Backend>(_vgg: Vgg<B>, _version: VggVersion) -> Vgg<B> {
+    panic!("Cannot load pretrained weights. Please enable the 'pretrained' feature in your Cargo.toml.");
+}
 
 pub enum VggVersion {
     Vgg11,

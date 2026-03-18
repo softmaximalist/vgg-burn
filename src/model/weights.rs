@@ -1,3 +1,5 @@
+#![cfg(feature = "pretrained")]
+
 use std::{fs::{self, File, rename}, io::Write, path::PathBuf};
 use burn_std::network::downloader::download_file_as_bytes;
 use burn_store::{ModuleSnapshot, PytorchStore};
