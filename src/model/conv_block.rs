@@ -28,7 +28,7 @@ impl<B: Backend> ConvBlock<B> {
         
         // Add the remaining conv layers and bn layers in the block (if there are any)
         for _ in 0..layers_num-1 {
-            let conv_config = Self::conv_config(in_channels, out_channels, device);
+            let conv_config = Self::conv_config(out_channels, out_channels, device);
             conv_layers.push(conv_config);
             
             if batch_normalize {
