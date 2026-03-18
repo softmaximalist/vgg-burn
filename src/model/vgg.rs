@@ -98,10 +98,7 @@ impl<B: Backend> Vgg<B> {
     }
     
     pub fn forward(&self, input: Tensor<B, 4>) -> Tensor<B, 2> {
-        let [n, c, _, _] = input.dims();
-        let reshaped_input = input.reshape([n, c, 224, 224]);
-        
-        let conv1_out = self.conv_block1.forward(reshaped_input);
+        let conv1_out = self.conv_block1.forward(input);
         let conv2_out = self.conv_block2.forward(conv1_out);
         let conv3_out = self.conv_block3.forward(conv2_out);
         let conv4_out = self.conv_block4.forward(conv3_out);
