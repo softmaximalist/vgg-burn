@@ -97,11 +97,11 @@ fn generate_key_patterns(vgg_version: &VggVersion) -> Vec<(String, String)> {
             burn_layer_index = 0;
         } else {
             key_patterns.push((
-                format!("features.{}.weight", pytorch_index),
+                format!(r"^features\.{}\.weight$", pytorch_index),
                 format!("conv_block{}.conv_layers.{}.weight", burn_block_index, burn_layer_index)
             ));
             key_patterns.push((
-                format!("features.{}.bias", pytorch_index),
+                format!(r"^features\.{}\.bias$", pytorch_index),
                 format!("conv_block{}.conv_layers.{}.bias", burn_block_index, burn_layer_index)
             ));
             
@@ -110,19 +110,19 @@ fn generate_key_patterns(vgg_version: &VggVersion) -> Vec<(String, String)> {
                 pytorch_index += 1;
                 
                 key_patterns.push((
-                    format!("features.{}.weight", pytorch_index),
+                    format!(r"^features\.{}\.weight$", pytorch_index),
                     format!("conv_block{}.bn_layers.{}.gamma", burn_block_index, burn_layer_index)
                 ));
                 key_patterns.push((
-                    format!("features.{}.bias", pytorch_index),
+                    format!(r"^features\.{}\.bias$", pytorch_index),
                     format!("conv_block{}.bn_layers.{}.beta", burn_block_index, burn_layer_index)
                 )); 
                 key_patterns.push((
-                    format!("features.{}.running_mean", pytorch_index),
+                    format!(r"^features\.{}\.running_mean$", pytorch_index),
                     format!("conv_block{}.bn_layers.{}.running_mean", burn_block_index, burn_layer_index)
                 ));
                 key_patterns.push((
-                    format!("features.{}.running_var", pytorch_index),
+                    format!(r"^features\.{}\.running_var$", pytorch_index),
                     format!("conv_block{}.bn_layers.{}.running_var", burn_block_index, burn_layer_index)
                 ));
             }
@@ -147,9 +147,14 @@ pub fn load_pretrained_weights<B: Backend>(mut vgg: Vgg<B>, vgg_version: VggVers
         store = store.with_key_remapping(pt_key, burn_key);
     }
     
+    store = store
+        .with_key_remapping(r"^classifier\.0\.", "fc_block.layer1.")
+        .with_key_remapping(r"^classifier\.3\.", "fc_block.layer2.")
+        .with_key_remapping(r"^classifier\.6\.", "fc_block.layer3.");
+    
     let result = vgg.load_from(&mut store);
     if let Err(e) = result {
-        eprintln!("Warning: Some weights for the VGG model could not be loaded: {:?}", e);
+        eprintln!("\nWarning: Some weights for the VGG model could not be loaded: \n{:?}", e);
     }
     
     vgg
