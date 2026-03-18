@@ -14,31 +14,25 @@ pub struct ConvBlock<B: Backend> {
 }
 
 impl<B: Backend> ConvBlock<B> {
-    pub fn new(channels: usize, layers_num: usize, batch_normalize: bool, device: &B::Device) -> Self {
+    pub fn new(in_channels: usize, out_channels: usize, layers_num: usize, batch_normalize: bool, device: &B::Device) -> Self {
         let mut conv_layers = Vec::with_capacity(layers_num);
         let mut bn_layers = Vec::with_capacity(layers_num);
         
         // Add first conv layer in the block
-        let conv1_config;
-        if channels == 64 {
-            conv1_config = Self::conv_config(3, channels, device);
-        } else {
-            conv1_config = Self::conv_config(channels / 2, channels, device);
-        }
-        conv_layers.push(conv1_config);
+        conv_layers.push(Self::conv_config(in_channels, out_channels, device));
         
         // Add first bn layer in the block if batch normalization is used
         if batch_normalize {
-            bn_layers.push(BatchNormConfig::new(channels).init(device));
+            bn_layers.push(BatchNormConfig::new(out_channels).init(device));
         }
         
         // Add the remaining conv layers and bn layers in the block (if there are any)
         for _ in 0..layers_num-1 {
-            let conv_config = Self::conv_config(channels, channels, device);
+            let conv_config = Self::conv_config(in_channels, out_channels, device);
             conv_layers.push(conv_config);
             
             if batch_normalize {
-                bn_layers.push(BatchNormConfig::new(channels).init(device));
+                bn_layers.push(BatchNormConfig::new(out_channels).init(device));
             }
         }
         

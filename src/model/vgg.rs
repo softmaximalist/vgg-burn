@@ -36,11 +36,11 @@ pub struct Vgg<B: Backend> {
 impl<B: Backend> Vgg<B> {
     fn construct_vgg(layer_nums: [usize; 5], batch_normalize: bool, device: &B::Device) -> Self {
         Self {
-            conv_block1: ConvBlock::new(64, layer_nums[0], batch_normalize, device),
-            conv_block2: ConvBlock::new(128, layer_nums[1], batch_normalize, device),
-            conv_block3: ConvBlock::new(256, layer_nums[2], batch_normalize, device),
-            conv_block4: ConvBlock::new(512, layer_nums[3], batch_normalize, device),
-            conv_block5: ConvBlock::new(512, layer_nums[4], batch_normalize, device),
+            conv_block1: ConvBlock::new(3, 64, layer_nums[0], batch_normalize, device),
+            conv_block2: ConvBlock::new(64, 128, layer_nums[1], batch_normalize, device),
+            conv_block3: ConvBlock::new(128, 256, layer_nums[2], batch_normalize, device),
+            conv_block4: ConvBlock::new(256, 512, layer_nums[3], batch_normalize, device),
+            conv_block5: ConvBlock::new(512, 512, layer_nums[4], batch_normalize, device),
             fc_block: FcBlock::new(device)
         }
     }
