@@ -142,7 +142,8 @@ pub fn load_pretrained_weights<B: Backend>(mut vgg: Vgg<B>, vgg_version: VggVers
     
     let key_patterns = generate_key_patterns(&vgg_version);
     
-    let mut store = PytorchStore::from_file(cache_path);
+    let mut store = PytorchStore::from_file(cache_path)
+        .map_indices_contiguous(false);
     for (pt_key, burn_key) in key_patterns {
         store = store.with_key_remapping(pt_key, burn_key);
     }
@@ -152,10 +153,8 @@ pub fn load_pretrained_weights<B: Backend>(mut vgg: Vgg<B>, vgg_version: VggVers
         .with_key_remapping(r"^classifier\.3\.", "fc_block.layer2.")
         .with_key_remapping(r"^classifier\.6\.", "fc_block.layer3.");
     
-    let result = vgg.load_from(&mut store);
-    if let Err(e) = result {
-        eprintln!("\nWarning: Some weights for the VGG model could not be loaded: \n{:?}", e);
-    }
+    let result = vgg.load_from(&mut store).expect("Failed to load pretrained VGG weights");
+    println!("\n{}", result);
     
     vgg
 }
