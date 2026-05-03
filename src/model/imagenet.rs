@@ -1,4 +1,4 @@
-use burn::tensor::{backend::Backend, Tensor};
+use burn::tensor::{Tensor, backend::Backend};
 
 const MEAN: [f32; 3] = [0.485, 0.456, 0.406];
 const STD: [f32; 3] = [0.229, 0.224, 0.225];
@@ -14,15 +14,15 @@ impl<B: Backend> Normalizer<B> {
     pub fn new(device: &B::Device) -> Self {
         Self {
             mean: Tensor::<B, 1>::from_floats(MEAN, device).reshape([1, 3, 1, 1]),
-            std: Tensor::<B, 1>::from_floats(STD, device).reshape([1, 3, 1, 1])
+            std: Tensor::<B, 1>::from_floats(STD, device).reshape([1, 3, 1, 1]),
         }
     }
-    
+
     /// Normalizes the input image according to the ImageNet dataset.
-    /// 
+    ///
     /// The input image should be in the range [0, 1].
     /// The output image will be in the range [-1, 1].
-    /// 
+    ///
     /// The normalization is done according to the following formula:
     /// `input = (input - mean) / std`
     pub fn normalize(&self, input: Tensor<B, 4>) -> Tensor<B, 4> {

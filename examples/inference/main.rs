@@ -46,7 +46,7 @@ pub fn main() {
 
     // Normalize the image using the ImageNet normalizer
     let input = imagenet::Normalizer::new(&device).normalize(img_tensor);
-    
+
     // println!("input: {}", input);
 
     // Forward pass
