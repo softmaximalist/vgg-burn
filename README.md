@@ -15,13 +15,13 @@ Users can initialize the models with random weights or they can use versions wit
 ### Usage
 
 Add the following to your `Cargo.toml` file:
-```text
+```bash
 [dependencies]
 vgg-burn = { git = "https://github.com/softmaximalist/vgg-burn", default-features = false }
+```
 
-```
 If you want to get the pretrained ImageNet weights, enable the `pretrained` feature flag:
-```
+```bash
 [dependencies]
 vgg-burn = { git = "https://github.com/softmaximalist/vgg-burn", features = ["pretrained"] }
 ```
@@ -32,6 +32,6 @@ vgg-burn = { git = "https://github.com/softmaximalist/vgg-burn", features = ["pr
 The inference example initializes a VGG16 model from the pretrained ImageNet weights with the NdArray backend and performs inference on the provided input image.
 
 The example can be run using the following command:
-```
+```bash
 cargo run --release --example inference samples/pineapple.jpg
 ```
