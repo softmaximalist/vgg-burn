@@ -15,13 +15,13 @@ Users can initialize the models with random weights or they can use versions wit
 ### Usage
 
 Add the following to your `Cargo.toml` file:
-```bash
+```toml
 [dependencies]
 vgg-burn = { git = "https://github.com/softmaximalist/vgg-burn", default-features = false }
 ```
 
 If you want to get the pretrained ImageNet weights, enable the `pretrained` feature flag:
-```bash
+```toml
 [dependencies]
 vgg-burn = { git = "https://github.com/softmaximalist/vgg-burn", features = ["pretrained"] }
 ```
